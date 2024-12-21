@@ -1,0 +1,290 @@
+{
+    "-REOF XXVI, LLCAsset-Backed Securities": {
+        "transaction_type": "Purchase$250,001 - $500,000",
+        "filed_date": "Sep 11, 2024",
+        "trade_date": "Aug 13, 2024",
+        "description": "INVESTMENT IN LLC WHICH IS ACQ..."
+    },
+    "MSFTMICROSOFT CORPORATION - COMMON STOCKStock": {
+        "transaction_type": "Sale$1,000,001 - $5,000,000",
+        "filed_date": "Jul 30, 2024",
+        "trade_date": "Jul 26, 2024",
+        "description": "SOLD 5,000 SHARES...."
+    },
+    "NVDANVIDIA CORPORATION - COMMON STOCKStock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Jul 2, 2024",
+        "trade_date": "Jun 26, 2024",
+        "description": "PURCHASED 10,000 SHARES...."
+    },
+    "VVISA INC.Stock": {
+        "transaction_type": "Sale$500,001 - $1,000,000",
+        "filed_date": "Jun 9, 2020",
+        "trade_date": "May 8, 2020",
+        "description": "SOLD 3,000 SHARES...."
+    },
+    "AVGOBROADCOM INC. - COMMON STOCKOptions": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Jul 2, 2024",
+        "trade_date": "Jun 24, 2024",
+        "description": "PURCHASED 20 CALL OPTIONS WITH..."
+    },
+    "TSLATESLA, INC. - COMMON STOCKStock": {
+        "transaction_type": "Sale$250,001 - $500,000",
+        "filed_date": "Jul 2, 2024",
+        "trade_date": "Jun 24, 2024",
+        "description": "SOLD 2,500 SHARES...."
+    },
+    "-FORGE INVESTMENTS, LLCAsset-Backed Securities": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Mar 21, 2024",
+        "trade_date": "Mar 4, 2024",
+        "description": "INVESTMENT IN FUND THAT OWNS D..."
+    },
+    "PANWPALO ALTO NETWORKS, INC.Options": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Feb 23, 2024",
+        "trade_date": "Feb 12, 2024",
+        "description": "PURCHASED 50 CALL OPTIONS WITH..."
+    },
+    "NVDANVIDIA CORPORATIONOptions": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Jul 2, 2021",
+        "trade_date": "Jun 3, 2021",
+        "description": "PURCHASED 50 CALL OPTIONS WITH..."
+    },
+    "AAPLAPPLE INC.Stock": {
+        "transaction_type": "Sale$500,001 - $1,000,000",
+        "filed_date": "Jun 9, 2020",
+        "trade_date": "May 8, 2020",
+        "description": "SOLD 1,700 SHARES...."
+    },
+    "MSFTMICROSOFT CORPORATIONStock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Apr 9, 2021",
+        "trade_date": "Mar 19, 2021",
+        "description": "EXERCISED 100 CALL OPTIONS (10..."
+    },
+    "-REOF XXV, LLCAsset-Backed Securities": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Apr 6, 2023",
+        "trade_date": "Mar 9, 2023",
+        "description": "INVESTMENT IN LLC WHICH IS ACQ..."
+    },
+    "RBLXROBLOX CORPORATION CLASS AOptions": {
+        "transaction_type": "Purchase$250,001 - $500,000",
+        "filed_date": "Dec 29, 2021",
+        "trade_date": "Dec 20, 2021",
+        "description": "PURCHASED 100 CALL OPTIONS WIT..."
+    },
+    "NFLXNETFLIX, INC.Stock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Jul 20, 2020",
+        "trade_date": "Jun 18, 2020",
+        "description": "EXERCISED 50 CALL OPTIONS (5,0..."
+    },
+    "GOOGLALPHABET INC. - CLASS AStock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Jul 2, 2021",
+        "trade_date": "Jun 18, 2021",
+        "description": "EXERCISED 40 CALL OPTIONS (4,0..."
+    },
+    "PYPLPAYPAL HOLDINGS, INC.Stock": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Jul 20, 2020",
+        "trade_date": "Jun 12, 2020",
+        "description": "PURCHASED 5,000 SHARES...."
+    },
+    "RBLXROBLOX CORPORATION CLASS AStock": {
+        "transaction_type": "Sale$100,001 - $250,000",
+        "filed_date": "Jan 12, 2023",
+        "trade_date": "Dec 28, 2022",
+        "description": "SOLD 5,000 SHARES...."
+    },
+    "-ALLIANCE BERNSTEIN HOLDING L.P. UNITS SOwnership Interest (Engaged in a Trade or Business)": {
+        "transaction_type": "Sale$500,001 - $1,000,000",
+        "filed_date": "Jan 12, 2023",
+        "trade_date": "Dec 28, 2022",
+        "description": "SOLD 20,000 SHARES...."
+    },
+    "-REOF XX, LLCAsset-Backed Securities": {
+        "transaction_type": "Purchase$15,001 - $50,000",
+        "filed_date": "Jun 9, 2020",
+        "trade_date": "Apr 28, 2020",
+        "description": "ADDITIONAL INVESTMENT IN LLC W..."
+    },
+    "DISWALT DISNEY COMPANYStock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Feb 28, 2022",
+        "trade_date": "Jan 21, 2022",
+        "description": "EXERCISED 100 CALL OPTIONS (10..."
+    },
+    "CRMSALESFORCE, INC.Options": {
+        "transaction_type": "Sale$9.00 - $210",
+        "filed_date": "Jan 12, 2023",
+        "trade_date": "Dec 20, 2022",
+        "description": "SOLD 130 CALL OPTIONS PURCHASE..."
+    },
+    "TSLATESLA, INC.Stock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Mar 21, 2022",
+        "trade_date": "Mar 17, 2022",
+        "description": "EXERCISED 25 CALL OPTIONS (2,5..."
+    },
+    "DISWALT DISNEY COMPANYOptions": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Jan 21, 2021",
+        "trade_date": "Dec 22, 2020",
+        "description": "PURCHASED 100 CALL OPTIONS WIT..."
+    },
+    "GOOGALPHABET INC. - CLASS C CAPITAL STOCKStock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Oct 14, 2022",
+        "trade_date": "Sep 16, 2022",
+        "description": "EXERCISED 200 CALL OPTIONS PUR..."
+    },
+    "MUMICRON TECHNOLOGY, INC.Options": {
+        "transaction_type": "Purchase$250,001 - $500,000",
+        "filed_date": "Dec 29, 2021",
+        "trade_date": "Dec 21, 2021",
+        "description": "PURCHASED 100 CALL OPTIONS WIT..."
+    },
+    "NVDANVIDIA CORPORATIONStock": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Aug 20, 2021",
+        "trade_date": "Jul 23, 2021",
+        "description": "PURCHASED 5,000 SHARES...."
+    },
+    "AAPLAPPLE INC.Options": {
+        "transaction_type": "Sale$1,000,001 - $5,000,000",
+        "filed_date": "Jul 20, 2020",
+        "trade_date": "Jun 18, 2020",
+        "description": "SOLD 100 CALL OPTIONS WITH A S..."
+    },
+    "MSFTMICROSOFT CORPORATIONOptions": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Apr 1, 2020",
+        "trade_date": "Feb 21, 2020",
+        "description": "PURCHASED 100 CALL OPTIONS WIT..."
+    },
+    "WBDWARNER BROS. DISCOVERY, INC. - SERIES AStock": {
+        "transaction_type": "Exchange$50,001 - $100,000",
+        "filed_date": "May 3, 2022",
+        "trade_date": "Apr 11, 2022",
+        "description": "2419 SHARES RECEIVED AS THE RE..."
+    },
+    "ABALLIANCEBERNSTEIN HOLDING L.P. UNITSOwnership Interest (Engaged in a Trade or Business)": {
+        "transaction_type": "Purchase$250,001 - $500,000",
+        "filed_date": "Feb 28, 2022",
+        "trade_date": "Jan 27, 2022",
+        "description": "PURCHASED 10,000 UNITS IN A GL..."
+    },
+    "AXPAMERICAN EXPRESS COMPANYStock": {
+        "transaction_type": "Purchase$250,001 - $500,000",
+        "filed_date": "Feb 28, 2022",
+        "trade_date": "Jan 21, 2022",
+        "description": "EXERCISED 50 CALL OPTIONS (5,0..."
+    },
+    "CRMSALESFORCE.COM INCOptions": {
+        "transaction_type": "Purchase$100,001 - $250,000",
+        "filed_date": "Dec 29, 2021",
+        "trade_date": "Dec 20, 2021",
+        "description": "PURCHASED 30 CALL OPTIONS WITH..."
+    },
+    "GOOGALPHABET INC. - CLASS C CAPITAL STOCKOptions": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Dec 29, 2021",
+        "trade_date": "Dec 17, 2021",
+        "description": "PURCHASED 10 CALL OPTIONS WITH..."
+    },
+    "MONTGOMERY, AL .2, SCHAUMBERG, IL .1LAKELAND, FL -1, ALBANY, GA - 1, ANDOVER, MA - 1, FAYETTEVILLE, NC - 1, GREENVILLE, SC - 1, JOHNSON CITY, TN - 1, BEAUMONT, TX - 1, RICHMOND, VA - 1, VANCOUVER, WA - 1) AND NINE HILTON-BRANDED HOTELSStock": {
+        "transaction_type": "Sale$250,001 - $500,000",
+        "filed_date": "Aug 20, 2021",
+        "trade_date": "Jul 22, 2021",
+        "description": "10,000 SHARES OF SLACK TECHNOL..."
+    },
+    "-REOF XXII, LLCAsset-Backed Securities": {
+        "transaction_type": "Purchase$250,001 - $500,000",
+        "filed_date": "Aug 20, 2021",
+        "trade_date": "Jul 13, 2021",
+        "description": "INVESTMENT IN LLC WHICH IS ACQ..."
+    },
+    "AMZNAMAZON.COM, INC.Options": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Jul 2, 2021",
+        "trade_date": "May 21, 2021",
+        "description": "PURCHASED 20 CALL OPTIONS WITH..."
+    },
+    "-ROBLOX CORPORATIONOther": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Apr 9, 2021",
+        "trade_date": "Mar 10, 2021",
+        "description": "PURCHASED 10,000 SHARES...."
+    },
+    "ABALLIANCEBERNSTEIN HOLDING L.P. UNITSStock": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Jan 21, 2021",
+        "trade_date": "Dec 22, 2020",
+        "description": "PURCHASED 20,000 SHARES...."
+    },
+    "TSLATESLA, INC.Options": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Jan 21, 2021",
+        "trade_date": "Dec 22, 2020",
+        "description": "PURCHASED 25 CALL OPTIONS WITH..."
+    },
+    "CRWDCROWDSTRIKE HOLDINGS, INC. - CLASS AStock": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Oct 4, 2020",
+        "trade_date": "Sep 3, 2020",
+        "description": "PURCHASED 5,000 SHARES...."
+    },
+    "FBFACEBOOK, INC. - CLASS AStock": {
+        "transaction_type": "Sale$1,000,001 - $5,000,000",
+        "filed_date": "Jun 9, 2020",
+        "trade_date": "May 8, 2020",
+        "description": "SOLD 5,000 SHARES...."
+    },
+    "AXPAMERICAN EXPRESS COMPANYOptions": {
+        "transaction_type": "Purchase$100,001 - $250,000",
+        "filed_date": "Jul 20, 2020",
+        "trade_date": "Jun 24, 2020",
+        "description": "PURCHASED 50 CALL OPTIONS WITH..."
+    },
+    "PYPLPAYPAL HOLDINGS, INC.Options": {
+        "transaction_type": "Purchase$250,001 - $500,000",
+        "filed_date": "Jul 20, 2020",
+        "trade_date": "Jun 24, 2020",
+        "description": "PURCHASED 50 CALL OPTIONS WITH..."
+    },
+    "CRMSALESFORCE.COM INCStock": {
+        "transaction_type": "Purchase$1,000,001 - $5,000,000",
+        "filed_date": "Jul 20, 2020",
+        "trade_date": "Jun 18, 2020",
+        "description": "EXERCISED 100 CALL OPTIONS (10..."
+    },
+    "IBKRINTERACTIVE BROKERS GROUP, INC. - CLASS AStock": {
+        "transaction_type": "Sale$100,001 - $250,000",
+        "filed_date": "Jun 9, 2020",
+        "trade_date": "May 8, 2020",
+        "description": "SOLD 3,000 SHARES...."
+    },
+    "MORNMORNINGSTAR, INC.Stock": {
+        "transaction_type": "Sale$100,001 - $250,000",
+        "filed_date": "Jun 9, 2020",
+        "trade_date": "May 8, 2020",
+        "description": "SOLD 1,700 SHARES...."
+    },
+    "GOOGLALPHABET INC. - CLASS AOptions": {
+        "transaction_type": "Purchase$500,001 - $1,000,000",
+        "filed_date": "Apr 1, 2020",
+        "trade_date": "Feb 27, 2020",
+        "description": "PURCHASED 40 CALL OPTIONS WITH..."
+    },
+    "": {
+        "transaction_type": null,
+        "filed_date": null,
+        "trade_date": null,
+        "description": null
+    }
+}
