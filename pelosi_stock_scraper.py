@@ -1,139 +1,118 @@
 import requests
-from bs4 import BeautifulSoup
-from flask import Flask, jsonify
-from datetime import datetime
 from pathlib import Path
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait  
-from selenium.webdriver.support import expected_conditions as EC  
-from webdriver_manager.chrome import ChromeDriverManager
-import json
-import argparse
+import zipfile
+from datetime import datetime
+import time
 
-# Initialize Flask app
-app = Flask(__name__)
+DOWNLOAD_URL = "https://disclosures-clerk.house.gov/public_disc/financial-pdfs/2024FD.zip"
+OUTPUT_FOLDER = Path("public_disclosures")
+CURRENT_DISCLOSURE = None
+CHECK_INTERVAL = 30  # Default is 1 hour
 
-# URL of the target page
-URL = "https://www.quiverquant.com/congresstrading/politician/Nancy%20Pelosi-P000197"
 
-# Initialize Selenium WebDriver
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # Run in headless mode
-chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
-chrome_options.add_argument("--no-sandbox")  # Overcome limited resource problems
-chrome_service = Service(ChromeDriverManager().install())
-
-def output_soup_to_files(soup):
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    instances_path = Path("instances")
-    instances_path.mkdir(exist_ok=True)
-    filename = instances_path / f"page_output_{timestamp}.html"
-    with open(filename, "w", encoding="utf-8") as file:
-        file.write(soup.prettify())
-
-def save_to_json(data):
-    """Save the dictionary to a JSON file."""
-    data_file = Path("trade_data.json")
-    if data_file.exists():
-        with data_file.open("r", encoding="utf-8") as file:
-            existing_data = json.load(file)
-    else:
-        existing_data = {}
-
-    # Update existing data with new data
-    existing_data.update(data)
-
-    with data_file.open("w", encoding="utf-8") as file:
-        json.dump(existing_data, file, indent=4)
-
-def fetch_data(data_type="trades"):
-    """Fetch data from the website and return parsed content based on data type."""
+def get_most_recent_file_by_name(directory):
     try:
-        # Use Selenium to load the page
-        driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
-        driver.get(URL)
+        files = list(directory.glob("*.txt"))  
+        if not files:
+            print("No files found in the directory.")
+            return None
 
-        # Wait for the specific table to load based on the data type
-        if data_type == "holdings":
-            WebDriverWait(driver, 40).until(
-                EC.presence_of_element_located((By.ID, "holdingsTable"))
-            )
-        elif data_type == "trades":
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, "tradeTable"))
-            )
+        most_recent_file = max(
+            files, key=lambda f: datetime.strptime(f.stem, "%a_%d_%b_%Y_%H-%M-%S_GMT")
+        )
+        print(f"Most recent file by name: {most_recent_file}")
+        return most_recent_file
+    except Exception as e:
+        print(f"Error finding most recent file by name: {e}")
+        return None
+    
 
-        # Parse the page with BeautifulSoup
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
-        driver.quit()
+def download_file(url, output_folder):
+    try:
+        response = requests.head(url)
+        response.raise_for_status()
+        last_modified = response.headers.get("Last-Modified")
 
-        if data_type == "trades":
-            trades = soup.select('#tradeTable tbody tr')  # Select all rows in the trade table
-            data = {}
+        if not last_modified:
+            print("Last-Modified header not found. Aborting download.")
+            return
+        
+        if CURRENT_DISCLOSURE:
+            most_recent_timestamp = datetime.strptime(CURRENT_DISCLOSURE.stem, "%a_%d_%b_%Y_%H-%M-%S_GMT")
+            last_modified_timestamp = datetime.strptime(last_modified, "%a, %d %b %Y %H:%M:%S GMT")
+            
+            if most_recent_timestamp == last_modified_timestamp:
+                print("File hasn't been updated. Skipping download.")
+                return 
 
-            for trade in trades:
-                stock_name = trade.select_one('td:nth-child(1)').text.strip() if trade.select_one('td:nth-child(1)') else None
-                transaction_type = trade.select_one('td:nth-child(2)').text.strip() if trade.select_one('td:nth-child(2)') else None
-                filed_date = trade.select_one('td:nth-child(3)').text.strip() if trade.select_one('td:nth-child(3)') else None
-                trade_date = trade.select_one('td:nth-child(4)').text.strip() if trade.select_one('td:nth-child(4)') else None
-                description = trade.select_one('td:nth-child(5)').text.strip() if trade.select_one('td:nth-child(5)') else None
+        new_file_name = last_modified.replace(",", "").replace(" ", "_").replace(":", "-") + ".txt"
+        print(f"Using new_file_name with last_modified as file name: {new_file_name}")
 
-                # Store or print data as needed
-                data[stock_name] = {
-                    "transaction_type": transaction_type,
-                    "filed_date": filed_date,
-                    "trade_date": trade_date,
-                    "description": description,
-                }
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        zip_path = output_folder / "temp_download.zip"
 
-        elif data_type == "holdings":
-            holdings_table = soup.select_one('#holdingsTable')
-            print(holdings_table)
-            if not holdings_table:
-                print("Holdings table not found!")
-                return {}
+        with open(zip_path, "wb") as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                file.write(chunk)
+        print(f"File downloaded successfully: {zip_path}")
 
-            holdings = holdings_table.select('tbody tr')  # Select all rows in the holdings table
-            data = {}
+        if zipfile.is_zipfile(zip_path):
+            extract_path = output_folder
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(extract_path)
+            print(f"File unzipped successfully to: {extract_path}")
 
-            for holding in holdings:
-                stock_name = holding.select_one('td:nth-child(1)').text.strip() if holding.select_one('td:nth-child(1)') else None
-                asset_type = holding.select_one('td:nth-child(2)').text.strip() if holding.select_one('td:nth-child(2)') else None
-                asset_name = holding.select_one('td:nth-child(3)').text.strip() if holding.select_one('td:nth-child(3)') else None
-                amount = holding.select_one('td:nth-child(4)').text.strip() if holding.select_one('td:nth-child(4)') else None
-                owner = holding.select_one('td:nth-child(5)').text.strip() if holding.select_one('td:nth-child(5)') else None
-                report_year = holding.select_one('td:nth-child(6)').text.strip() if holding.select_one('td:nth-child(6)') else None
-                filed_date = holding.select_one('td:nth-child(7)').text.strip() if holding.select_one('td:nth-child(7)') else None
+            for file in extract_path.iterdir():
+                if file.suffix == ".txt":
+                    new_name = extract_path / new_file_name
+                    file.rename(new_name)
+                    print(f"Renamed text file to: {new_name}")
+                elif file.suffix == ".xml":
+                    file.unlink()
+                    print(f"Deleted XML file: {file}")
 
-                # Store or print data as needed
-                data[stock_name] = {
-                    "asset_type": asset_type,
-                    "asset_name": asset_name,
-                    "amount": amount,
-                    "owner": owner,
-                    "report_year": report_year,
-                    "filed_date": filed_date,
-                }
-
-        else:
-            raise ValueError("Invalid data type specified. Choose 'trades' or 'holdings'.")
-
-        print(data)
-        save_to_json(data)
+            zip_path.unlink()
+            print(f"ZIP file removed: {zip_path}")
 
     except Exception as e:
-        print("Error fetching data:", e)  # Print the error to the terminal
-        return {"error": str(e)}
+        print(f"Error downloading or processing file: {e}")
 
-def main():
-    parser = argparse.ArgumentParser(description="Fetch Nancy Pelosi's trade or holdings data.")
-    parser.add_argument("data_type", choices=["trades", "holdings"], help="Specify whether to fetch trades or holdings data.")
-    args = parser.parse_args()
-
-    fetch_data(args.data_type)
+def parse_text_file(file_path):
+    pelosi_trades = {}
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            for line in file:
+                fields = [field.strip() for field in line.split('\t')]
+                if fields[1] == "Pelosi":
+                    pelosi_trades[fields[-1]] = fields[-2] # doc_id, trade_date 
+        return pelosi_trades
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return {}
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        return {}
 
 if __name__ == "__main__":
-    main()
+    # Ensure the directory exists
+    OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+
+    while True:
+        if any(OUTPUT_FOLDER.glob("*.txt")):
+            CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
+        
+        download_file(DOWNLOAD_URL, OUTPUT_FOLDER)
+        if CURRENT_DISCLOSURE:
+            holdings = parse_text_file(CURRENT_DISCLOSURE)
+            print(holdings)
+
+        print(f"Waiting for {CHECK_INTERVAL} seconds before checking again...")
+        time.sleep(CHECK_INTERVAL)
+
+
+
+
+
+
+
