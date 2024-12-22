@@ -5,6 +5,8 @@ from datetime import datetime
 import time
 import json
 
+from PDFHandler import PDFHandler
+
 # Global constants
 DOWNLOAD_URL = "https://disclosures-clerk.house.gov/public_disc/financial-pdfs/2024FD.zip"
 OUTPUT_FOLDER = Path("public_disclosures")
@@ -138,6 +140,9 @@ if __name__ == "__main__":
     # check for existing file in case of restart
     if any(OUTPUT_FOLDER.glob("*.txt")):
         CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
+    
+    pdf_handler = PDFHandler('trades')
+    pdf_handler.extract_trade_data(Path('trades/20024542.pdf'))
 
     while True:
         try:
@@ -149,11 +154,18 @@ if __name__ == "__main__":
                 last_modified_header = requests.head(DOWNLOAD_URL).headers.get("Last-Modified")
                 save_to_json(holdings, JSON_OUTPUT, last_modified_header)
 
+                # scrape web for information regarding trade ids 
+                pdf_handler = PDFHandler('trades')
+
+                # iteraste through document ids 
+                for k,v in holdings.items():
+                    print("processing trade id: ", k)
+                    pdf_handler.download_pdf(k)
+                
+                pdf_handler.print_pdf_line_by_line(Path('trades/20024542.pdf'))
+
         except Exception as e:
             print(f"Error processing disclosure file: {e}")
-
-
-            # scrape web for information regarding trade ids 
 
 
         print(f"Waiting for {CHECK_INTERVAL} seconds before checking again...")
