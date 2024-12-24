@@ -4,13 +4,14 @@ import zipfile
 from datetime import datetime
 import time
 import json
-
-from PDFHandler import PDFHandler
+from Utilities.PDFHandler import PDFHandler
+from config.config import (
+    DOWNLOAD_URL,
+    OUTPUT_FOLDER,
+    JSON_OUTPUT
+)   
 
 # Global constants
-DOWNLOAD_URL = "https://disclosures-clerk.house.gov/public_disc/financial-pdfs/2024FD.zip"
-OUTPUT_FOLDER = Path("public_disclosures")
-JSON_OUTPUT = Path("transactions/pelosi_trades.json")
 CURRENT_DISCLOSURE = None
 
 # Time interval in seconds
