@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import pdfplumber
 import re
+import json
 
 class PDFHandler:
     """
@@ -41,6 +42,9 @@ class PDFHandler:
         """
         Removes null bytes from the given text.
         """
+        if text is None:
+            return ""
+        # Remove null characters (\u0000) by translating ASCII 0 to None
         return text.translate({0: None})
 
     def get_lines_from_pdf(pdf_path):
@@ -112,7 +116,13 @@ class PDFHandler:
         """
         Combines data from four lines into a single transaction record,
         including company info, transaction type, dates, amounts, and description.
+
+        This method now uses 'clean_text' to remove any null bytes from line3 and line4.
         """
+        # Clean line3 and line4 before storing them
+        line3_cleaned = self.clean_text(line3)
+        line4_cleaned = self.clean_text(line4)
+
         d = {
             "company_name": "",
             "ticker": "",
@@ -126,8 +136,8 @@ class PDFHandler:
             "buy_or_sell": "",
             "line1_raw": line1,
             "line2_raw": line2,
-            "line3_raw": line3,
-            "line4_raw": line4
+            "line3_raw": line3_cleaned,  # Store the cleaned version
+            "line4_raw": line4_cleaned   # Store the cleaned version
         }
 
         line1_data = self.parse_line1(line1)
@@ -136,7 +146,7 @@ class PDFHandler:
         line2_data = self.parse_line2(line2)
         d.update(line2_data)
 
-        desc = self.parse_line4(line4)
+        desc = self.parse_line4(line4_cleaned)
         d["description"] = desc
 
         trans_type_lower = d["transaction_type"].lower()
@@ -193,10 +203,11 @@ class PDFHandler:
             i += 1
         return transactions
 
-    def extract_trade_data(self, pdf_path) -> dict:
+    def extract_trade_data(self, pdf_path) -> list:
         """
         Retrieves all parsed transactions from a single PDF
         and prints each transaction's details.
+        Returns the list of transactions so it can be used or saved.
         """
         transactions = self.get_transactions(pdf_path)
         for idx, tx in enumerate(transactions, 1):
@@ -204,15 +215,24 @@ class PDFHandler:
             for k, v in tx.items():
                 print(f"  {k}: {v}")
             print()
+        return transactions
 
     def process_all_pdfs(self):
         """
         Processes every PDF stored in pdf_files, extracting and returning 
-        all transaction data from all PDFs as a combined list.
+        all transaction data from all PDFs as a combined list. 
+        Also writes the combined transaction list to a JSON file.
         """
         all_trades = []
         for pdf_file in self.pdf_files:
             trades = self.extract_trade_data(pdf_file)
             if trades:
                 all_trades.extend(trades)
+
+        # Write all trades to a JSON file in the output folder
+        json_path = self.output_folder / "transactions.json"
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(all_trades, f, indent=4)
+        
+        print(f"All transactions have been written to {json_path}")
         return all_trades
