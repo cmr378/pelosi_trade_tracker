@@ -10,11 +10,11 @@ from PDFHandler import PDFHandler
 # Global constants
 DOWNLOAD_URL = "https://disclosures-clerk.house.gov/public_disc/financial-pdfs/2024FD.zip"
 OUTPUT_FOLDER = Path("public_disclosures")
-JSON_OUTPUT = Path("trades/pelosi_trades.json")
+JSON_OUTPUT = Path("transactions/pelosi_trades.json")
 CURRENT_DISCLOSURE = None
 
 # Time interval in seconds
-CHECK_INTERVAL = 30  # Default is 1 hour
+CHECK_INTERVAL = 3600  # Default is 1 hour
 
 def download_file(url, output_folder) -> bool:
     
@@ -37,7 +37,6 @@ def download_file(url, output_folder) -> bool:
                 print("File hasn't been updated. Skipping download.")
                 return  False
 
-        print('test')
         new_file_name = last_modified.replace(",", "").replace(" ", "_").replace(":", "-") + ".txt"
         print(f"Using new_file_name with last_modified as file name: {new_file_name}")
 
@@ -91,14 +90,14 @@ def get_most_recent_file_by_name(directory):
         return None
 
 def parse_text_file(file_path):
-    pelosi_trades = {}
+    pelosi_transactions = {}
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             for line in file:
                 fields = [field.strip() for field in line.split('\t')]
                 if fields[1] == "Pelosi":
-                    pelosi_trades[fields[-1]] = fields[-2]  # doc_id, trade_date 
-        return pelosi_trades
+                    pelosi_transactions[fields[-1]] = fields[-2]  # doc_id, trade_date 
+            return pelosi_transactions
     except FileNotFoundError:
         print(f"File not found: {file_path}")
         return {}
@@ -134,35 +133,34 @@ def load_from_json(file_path):
         return {}
 
 if __name__ == "__main__":
-
+    
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
-
-    # check for existing file in case of restart
+    JSON_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    Path("transaction_pdfs").mkdir(parents=True, exist_ok=True)  
+    
     if any(OUTPUT_FOLDER.glob("*.txt")):
         CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
-    
-    pdf_handler = PDFHandler('trades')
-    pdf_handler.extract_trade_data(Path('trades/20024542.pdf'))
 
     while True:
         try:
             if download_file(DOWNLOAD_URL, OUTPUT_FOLDER):
                 CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
-                holdings = parse_text_file(CURRENT_DISCLOSURE)
+                pelosi_transactions = parse_text_file(CURRENT_DISCLOSURE)
 
+                # scrape web for information regarding transaction ids 
+                pdf_handler = PDFHandler('transaction_pdfs')
+
+                # iteraste through document ids and download transaction reports 
+                for k,v in pelosi_transactions.items():
+                    print("processing trade id: ", k)
+                    pdf_handler.download_pdf(k) 
+                
+                transactions_data = pdf_handler.process_all_pdfs()
+                print('transactions_data', transactions_data)
+                
                 # save to json 
                 last_modified_header = requests.head(DOWNLOAD_URL).headers.get("Last-Modified")
-                save_to_json(holdings, JSON_OUTPUT, last_modified_header)
-
-                # scrape web for information regarding trade ids 
-                pdf_handler = PDFHandler('trades')
-
-                # iteraste through document ids 
-                for k,v in holdings.items():
-                    print("processing trade id: ", k)
-                    pdf_handler.download_pdf(k)
-                
-                pdf_handler.print_pdf_line_by_line(Path('trades/20024542.pdf'))
+                save_to_json(transactions_data, JSON_OUTPUT, last_modified_header)
 
         except Exception as e:
             print(f"Error processing disclosure file: {e}")
