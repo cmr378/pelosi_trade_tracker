@@ -228,11 +228,5 @@ class PDFHandler:
             trades = self.extract_trade_data(pdf_file)
             if trades:
                 all_trades.extend(trades)
-
-        # Write all trades to a JSON file in the output folder
-        json_path = self.output_folder / "transactions.json"
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(all_trades, f, indent=4)
         
-        print(f"All transactions have been written to {json_path}")
         return all_trades
