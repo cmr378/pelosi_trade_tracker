@@ -1,0 +1,58 @@
+{
+    "last_modified": "Wed, 25 Dec 2024 14:00:58 GMT",
+    "data": [
+        {
+            "ticker": "PANW",
+            "buy_or_sell": "Buy",
+            "transaction_type": "options",
+            "expiration_date": "1/17/25"
+        },
+        {
+            "ticker": "PANW",
+            "buy_or_sell": "Buy",
+            "transaction_type": "options",
+            "expiration_date": "1/17/25"
+        },
+        {
+            "ticker": "Forge Investments, LLC [AB] P",
+            "buy_or_sell": "Buy",
+            "transaction_type": "shares"
+        },
+        {
+            "ticker": "AVGO",
+            "buy_or_sell": "Buy",
+            "transaction_type": "options",
+            "expiration_date": "6/20/25"
+        },
+        {
+            "ticker": "NVDA",
+            "buy_or_sell": "Buy",
+            "transaction_type": "shares"
+        },
+        {
+            "ticker": "TSLA",
+            "buy_or_sell": "Sell",
+            "transaction_type": "shares"
+        },
+        {
+            "ticker": "V",
+            "buy_or_sell": "Sell",
+            "transaction_type": "shares"
+        },
+        {
+            "ticker": "MSFT",
+            "buy_or_sell": "Sell",
+            "transaction_type": "shares"
+        },
+        {
+            "ticker": "NVDA",
+            "buy_or_sell": "Buy",
+            "transaction_type": "shares"
+        },
+        {
+            "ticker": "REOF XXVI, LLC [AB] P",
+            "buy_or_sell": "Buy",
+            "transaction_type": "shares"
+        }
+    ]
+}

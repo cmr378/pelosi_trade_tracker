@@ -4,13 +4,16 @@ import zipfile
 from datetime import datetime
 import time
 import json
+from Utilities.PDFHandler import PDFHandler
 
-from PDFHandler import PDFHandler
+from config.config import (
+    DOWNLOAD_URL,
+    OUTPUT_FOLDER,
+    JSON_OUTPUT,
+    PDF_OUTPUT
+)   
 
 # Global constants
-DOWNLOAD_URL = "https://disclosures-clerk.house.gov/public_disc/financial-pdfs/2024FD.zip"
-OUTPUT_FOLDER = Path("public_disclosures")
-JSON_OUTPUT = Path("transactions/pelosi_trades.json")
 CURRENT_DISCLOSURE = None
 
 # Time interval in seconds
@@ -135,9 +138,9 @@ def load_from_json(file_path):
 if __name__ == "__main__":
     
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+    PDF_OUTPUT.mkdir(parents=True, exist_ok=True)
     JSON_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    Path("transaction_pdfs").mkdir(parents=True, exist_ok=True)  
-    
+        
     if any(OUTPUT_FOLDER.glob("*.txt")):
         CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
 
@@ -148,7 +151,7 @@ if __name__ == "__main__":
                 pelosi_transactions = parse_text_file(CURRENT_DISCLOSURE)
 
                 # scrape web for information regarding transaction ids 
-                pdf_handler = PDFHandler('transaction_pdfs')
+                pdf_handler = PDFHandler(PDF_OUTPUT)
 
                 # iteraste through document ids and download transaction reports 
                 for k,v in pelosi_transactions.items():

@@ -1,3 +1,11 @@
 __pycache__/
 
+public_disclosures/*
+
+*.pdf
+
 .DS_Store
+
+Stock Tracker/__pycache__/PDFHandler.cpython-311.pyc
+
+*.pyc

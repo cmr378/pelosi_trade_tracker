@@ -1,0 +1,44 @@
+# Cryptocurrency Tracking
+
+The **CryptoTracker** is a Python-based tool designed to monitor cryptocurrency prices and trigger buy orders when certain conditions are met.
+
+---
+
+###Features
+
+1. **Price Monitoring**
+
+- Continuously monitors the prices of specified cryptocurrencies.
+- Retrieves opening prices at the start of the day and calculates thresholds for buy orders.
+
+2. **Buy Order Trigger**
+
+- Automatically places a buy order if the current price falls below 80% of the opening price.
+
+3. **JSON Storage**
+
+- Saves the timeline of prices to a JSON file for record-keeping and analysis.
+
+---
+
+## Key Files
+
+- **`CryptoTracker.py`**: Main script to monitor cryptocurrency prices and trigger buy orders.
+- **`RobinhoodHandler.py`**: Handles interactions with the Robinhood API.
+- **`FileUtils.py`**: Manages file operations for storing price data.
+
+---
+
+## Setup and Usage
+
+1. Configure Settings:
+
+- Update config.py with your Robinhood credentials and desired cryptocurrency symbols.
+
+2. Run the CryptoTracker:
+
+- The script logs into Robinhood and retrieves the opening prices for the day.
+- Monitors prices at regular intervals and triggers buy orders when conditions are met.
+- Logs all transactions and price changes to a JSON file.
+
+---
