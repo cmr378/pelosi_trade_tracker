@@ -59,112 +59,66 @@ class PDFHandler:
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
         return lines
 
-    def parse_line1(self, line):
-        """
-        Parses the first line of a 4-line transaction block from the PDF text 
-        and returns relevant data as a dictionary.
-        """
-        pattern_line1 = re.compile(
-            r"^SP\s+(.*?)\((.*?)\)\s+([PS].*?)\s+(\d{2}/\d{2}/\d{4})\s+(\d{2}/\d{2}/\d{4})\s+\$(.*?)\s*-\s*$"
-        )
-        match = pattern_line1.match(line)
-        if match:
-            company_name = match.group(1).strip()
-            ticker = match.group(2).strip()
-            trans_type = match.group(3).strip()
-            trans_date = match.group(4).strip()
-            notif_date = match.group(5).strip()
-            amount_min = match.group(6).strip()
-            return {
-                "company_name": company_name,
-                "ticker": ticker,
-                "transaction_type": trans_type,
-                "transaction_date": trans_date,
-                "notification_date": notif_date,
-                "amount_min": amount_min
-            }
-        return {}
-
-    def parse_line2(self, line):
-        """
-        Parses the second line of a 4-line transaction block from the PDF text 
-        and returns any bracket code and maximum amount as a dictionary.
-        """
-        pattern_line2 = re.compile(r"\[(.*?)\]\s*\$(\d[\d,]*)")
-        match = pattern_line2.search(line)
-        if match:
-            bracket_code = match.group(1).strip()
-            amount_max = match.group(2).strip()
-            return {
-                "bracket_code": bracket_code,
-                "amount_max": amount_max
-            }
-        return {}
-
-    def parse_line4(self, line):
-        """
-        Parses the fourth line of a 4-line transaction block from the PDF text 
-        to extract a description.
-        """
-        pattern_line4 = re.compile(r"(?:D:|Description:)\s*(.*)", re.IGNORECASE)
-        match = pattern_line4.search(line)
-        if match:
-            return match.group(1).strip()
-        return ""
-
     def parse_4line_block(self, line1, line2, line3, line4):
         """
-        Combines data from four lines into a single transaction record,
-        including company info, transaction type, dates, amounts, and description.
-
-        This method now uses 'clean_text' to remove any null bytes from line3 and line4.
+        Extracts key information:
+        1. Ticker symbol (or company name if ticker not found)
+        2. Buy/Sell indicator
+        3. Whether it's shares or options (including expiration date for options)
         """
-        # Clean line3 and line4 before storing them
-        line3_cleaned = self.clean_text(line3)
-        line4_cleaned = self.clean_text(line4)
+        # Find ticker from either line1 or line2
+        ticker = ""
+        ticker_match = re.search(r'\(([A-Z]+)\)', line1 + line2)
+        if ticker_match:
+            ticker = ticker_match.group(1)
+        else:
+            # If no ticker found, extract company name from line1
+            company_match = re.match(r'^SP\s+(.*?)(?:\d{2}/\d{2}/\d{4}|$)', line1)
+            if company_match:
+                ticker = company_match.group(1).strip()
 
-        d = {
-            "company_name": "",
-            "ticker": "",
-            "transaction_type": "",
-            "transaction_date": "",
-            "notification_date": "",
-            "amount_min": "",
-            "amount_max": "",
-            "bracket_code": "",
-            "description": "",
-            "buy_or_sell": "",
-            "line1_raw": line1,
-            "line2_raw": line2,
-            "line3_raw": line3_cleaned,  # Store the cleaned version
-            "line4_raw": line4_cleaned   # Store the cleaned version
+        # Determine if Buy or Sell from line1
+        buy_or_sell = "Unknown"
+        if 'S' in line1.split()[2:]:  # Skip the "SP" at start
+            buy_or_sell = "Sell"
+        elif 'P' in line1.split()[2:]:
+            buy_or_sell = "Buy"
+
+        # Check if options or shares and get expiration date if it's an option
+        transaction_type = "shares"
+        expiration_date = None
+        
+        if any(word in line4.lower() for word in ['call', 'option', 'strike']):
+            transaction_type = "options"
+            # Try multiple date patterns and print debug info
+            print(f"Found options trade, line4: {line4}")  # Debug print
+            
+            date_patterns = [
+                r'(?:exp|expiration|expires?)?\s*(\d{2}/\d{2}/\d{4})',  # MM/DD/YYYY
+                r'(?:exp|expiration|expires?)?\s*(\d{1,2}/\d{1,2}/\d{2,4})',  # M/D/YY or M/D/YYYY
+                r'(\d{1,2}/\d{1,2}/\d{2,4})',  # Any date format
+                r'(?:exp|expiration|expires?)?\s*(\w+ \d{1,2},? \d{4})'  # January 15, 2024
+            ]
+            
+            for pattern in date_patterns:
+                exp_match = re.search(pattern, line4)
+                if exp_match:
+                    expiration_date = exp_match.group(1)
+                    print(f"Found expiration date: {expiration_date}")  # Debug print
+                    break
+
+        result = {
+            "ticker": ticker,
+            "buy_or_sell": buy_or_sell,
+            "transaction_type": transaction_type
         }
 
-        line1_data = self.parse_line1(line1)
-        d.update(line1_data)
+        # Only add expiration_date if it's an option and we found a date
+        if transaction_type == "options" and expiration_date:
+            print("Expiration date found:", expiration_date)
+            result["expiration_date"] = expiration_date
 
-        line2_data = self.parse_line2(line2)
-        d.update(line2_data)
-
-        desc = self.parse_line4(line4_cleaned)
-        d["description"] = desc
-
-        trans_type_lower = d["transaction_type"].lower()
-        desc_lower = desc.lower()
-
-        if "s" in trans_type_lower:
-            d["buy_or_sell"] = "Sell"
-        elif "p" in trans_type_lower:
-            d["buy_or_sell"] = "Buy"
-        else:
-            if "sold" in desc_lower:
-                d["buy_or_sell"] = "Sell"
-            elif "purchas" in desc_lower:
-                d["buy_or_sell"] = "Buy"
-            else:
-                d["buy_or_sell"] = "Unknown"
-
-        return d
+        return result
 
     def get_lines_from_pdf(self, pdf_path):
         """
