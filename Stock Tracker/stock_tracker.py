@@ -4,11 +4,11 @@ import zipfile
 from datetime import datetime
 import time
 import json
-from Utilities.PDFHandler import PDFHandler
+from Utilities.pdf_handler import PDFHandler
 from config.config import (
-    DOWNLOAD_URL,
-    OUTPUT_FOLDER,
-    JSON_OUTPUT
+    STOCK_DOWNLOAD_URL,
+    STOCK_OUTPUT_FOLDER,
+    STOCK_JSON_OUTPUT
 )   
 
 # Global constants
@@ -135,17 +135,17 @@ def load_from_json(file_path):
 
 if __name__ == "__main__":
     
-    OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
-    JSON_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    STOCK_OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+    STOCK_JSON_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     Path("transaction_pdfs").mkdir(parents=True, exist_ok=True)  
     
-    if any(OUTPUT_FOLDER.glob("*.txt")):
-        CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
+    if any(STOCK_OUTPUT_FOLDER.glob("*.txt")):
+        CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(STOCK_OUTPUT_FOLDER))
 
     while True:
         try:
-            if download_file(DOWNLOAD_URL, OUTPUT_FOLDER):
-                CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
+            if download_file(STOCK_DOWNLOAD_URL, STOCK_OUTPUT_FOLDER):
+                CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(STOCK_OUTPUT_FOLDER))
                 pelosi_transactions = parse_text_file(CURRENT_DISCLOSURE)
 
                 # scrape web for information regarding transaction ids 
@@ -160,8 +160,8 @@ if __name__ == "__main__":
                 print('transactions_data', transactions_data)
                 
                 # save to json 
-                last_modified_header = requests.head(DOWNLOAD_URL).headers.get("Last-Modified")
-                save_to_json(transactions_data, JSON_OUTPUT, last_modified_header)
+                last_modified_header = requests.head(STOCK_DOWNLOAD_URL).headers.get("Last-Modified")
+                save_to_json(transactions_data, STOCK_JSON_OUTPUT, last_modified_header)
 
         except Exception as e:
             print(f"Error processing disclosure file: {e}")

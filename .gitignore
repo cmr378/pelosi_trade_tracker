@@ -1,1 +1,24 @@
-config.py 
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configuration files
+config/config.py
+
+# Data directories
+transactions/
+transaction_pdfs/
+public_disclosures/
+crypto_data/
+
+# Data files
+*.json
+*.pdf
+*.zip
+*.txt
+
+# Environment
+.env
+venv/
+.venv/

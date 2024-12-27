@@ -1,9 +1,7 @@
 import requests
-import os
 from pathlib import Path
 import pdfplumber
 import re
-import json
 
 class PDFHandler:
     """

@@ -1,5 +1,5 @@
 from config.config import (
-     OUTPUT_FOLDER,
+     STOCK_OUTPUT_FOLDER,
      CRYPTO_OUTPUT_FOLDER
 )
 
@@ -10,12 +10,14 @@ class FileUtils:
 
     @staticmethod
     def initialize_output_folder():
-        OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+        STOCK_OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+        print("----------------------------------------------------")
         print(f"Output folder initialized")
     
     @staticmethod
     def initialize_crypto_output_folder():
         CRYPTO_OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+        print("----------------------------------------------------")
         print(f"Output folder initialized")
     
    
