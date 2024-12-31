@@ -1,3 +1,4 @@
+from io import BytesIO
 import requests
 from pathlib import Path
 import zipfile
@@ -5,25 +6,31 @@ from datetime import datetime
 import time
 import json
 from utilities.pdf_handler import PDFHandler
+from utilities.robinhood_handler import RobinhoodHandler
 
 from config.config import (
     DOWNLOAD_URL,
     OUTPUT_FOLDER,
     JSON_OUTPUT,
-    PDF_OUTPUT
+    PDF_OUTPUT,
+    SAVE_FILES
 )   
-
-# Global constants
-CURRENT_DISCLOSURE = None
 
 # Time interval in seconds
 CHECK_INTERVAL = 3600  # Default is 1 hour
 
-def download_file(url, output_folder) -> bool:
-    
+CURRENT_DISCLOSURE = None
+
+def download_file(url: str, output_folder: Path) -> bool:
+    """
+    Downloads and processes the file from the given URL in memory.
+    Optionally saves the text file to disk at the end.
+    Returns True if successful, False otherwise.
+    """
     global CURRENT_DISCLOSURE
-    
+
     try:
+        # Make a HEAD request to get the Last-Modified header
         response = requests.head(url)
         response.raise_for_status()
         last_modified = response.headers.get("Last-Modified")
@@ -31,51 +38,49 @@ def download_file(url, output_folder) -> bool:
         if not last_modified:
             print("Last-Modified header not found. Aborting download.")
             return False
-        
-        if CURRENT_DISCLOSURE:
-            most_recent_timestamp = datetime.strptime(CURRENT_DISCLOSURE.stem, "%a_%d_%b_%Y_%H-%M-%S_GMT")
-            last_modified_timestamp = datetime.strptime(last_modified, "%a, %d %b %Y %H:%M:%S GMT")
-            
-            if most_recent_timestamp == last_modified_timestamp:
-                print("File hasn't been updated. Skipping download.")
-                return  False
 
         new_file_name = last_modified.replace(",", "").replace(" ", "_").replace(":", "-") + ".txt"
         print(f"Using new_file_name with last_modified as file name: {new_file_name}")
 
+        # Download the ZIP file into memory
         response = requests.get(url, stream=True)
         response.raise_for_status()
-        zip_path = output_folder / "temp_download.zip"
+        zip_data = BytesIO(response.content)
+        print("ZIP file downloaded successfully into memory.")
 
-        with open(zip_path, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-        print(f"File downloaded successfully: {zip_path}")
+        # Check if the file is a valid ZIP and extract its contents
+        if zipfile.is_zipfile(zip_data):
+            with zipfile.ZipFile(zip_data, 'r') as zip_ref:
+                # Iterate through files in the ZIP
+                for file_name in zip_ref.namelist():
+                    with zip_ref.open(file_name) as file:
+                        if file_name.endswith(".txt"):
+                            # Process the text file in memory
+                            CURRENT_DISCLOSURE = file.read().decode('utf-8')
+                            if SAVE_FILES:
+                                file_path = output_folder / new_file_name
+                                with open(file_path, "w", encoding="utf-8") as f:
+                                    f.write(CURRENT_DISCLOSURE)
+                                print(f"Text file saved to disk: {file_path}")
 
-        if zipfile.is_zipfile(zip_path):
-            extract_path = output_folder
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_path)
-            print(f"File unzipped successfully to: {extract_path}")
+                        elif file_name.endswith(".xml"):
+                            print(f"Ignored and skipped XML file: {file_name}")
+            return True
 
-            for file in extract_path.iterdir():
-                if file.suffix == ".txt":
-                    new_name = extract_path / new_file_name
-                    file.rename(new_name)
-                    CURRENT_DISCLOSURE = new_name
-                    print(f"Renamed text file to: {new_name}")
-                elif file.suffix == ".xml":
-                    file.unlink()
-                    print(f"Deleted XML file: {file}")
-
-            zip_path.unlink()
-            print(f"ZIP file removed: {zip_path}")
-            return True 
+        else:
+            print("The downloaded file is not a valid ZIP file.")
+            return False
 
     except Exception as e:
         print(f"Error downloading or processing file: {e}")
+        return False
 
-def get_most_recent_file_by_name(directory):
+def get_most_recent_file_by_name(directory: Path) -> Path:
+    """
+    Finds the most recent file in the specified directory based on its name.
+    Assumes file names contain timestamps in a specific format.
+    Returns the most recent file or None if no files are found.
+    """
     try:
         files = list(directory.glob("*.txt"))  # Filter for text files only
         if not files:
@@ -92,24 +97,26 @@ def get_most_recent_file_by_name(directory):
         print(f"Error finding most recent file by name: {e}")
         return None
 
-def parse_text_file(file_path):
-    pelosi_transactions = {}
+def parse_text_content(text_content: str) -> dict:
+    """
+    Parses the text content to extract transaction information related to Pelosi.
+    Returns a dictionary with document IDs as keys and trade dates as values.
+    """
+    disclosure_content = {}
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            for line in file:
-                fields = [field.strip() for field in line.split('\t')]
-                if fields[1] == "Pelosi":
-                    pelosi_transactions[fields[-1]] = fields[-2]  # doc_id, trade_date 
-            return pelosi_transactions
-    except FileNotFoundError:
-        print(f"File not found: {file_path}")
-        return {}
+        for line in text_content.splitlines():
+            fields = [field.strip() for field in line.split('\t')]
+            if len(fields) > 1 and fields[1] == "Pelosi":
+                disclosure_content[fields[-1]] = fields[-2]  # doc_id, trade_date 
+        return disclosure_content
     except Exception as e:
-        print(f"Error reading file: {e}")
+        print(f"Error parsing text content: {e}")
         return {}
 
-def save_to_json(data, file_path, last_modified):
-    """Save a dictionary to a JSON file with last modified timestamp."""
+def save_to_json(data: dict, file_path: Path, last_modified: str) -> None:
+    """
+    Save a dictionary to a JSON file with a last-modified timestamp.
+    """
     try:
         output_data = {
             "last_modified": last_modified,
@@ -121,7 +128,11 @@ def save_to_json(data, file_path, last_modified):
     except Exception as e:
         print(f"Error saving data to JSON: {e}")
 
-def load_from_json(file_path):
+def load_from_json(file_path: Path) -> dict:
+    """
+    Load a dictionary from a JSON file.
+    Returns an empty dictionary if the file does not exist or an error occurs.
+    """
     try:
         if not file_path.exists():
             print(f"JSON file does not exist: {file_path}")
@@ -136,42 +147,45 @@ def load_from_json(file_path):
         return {}
 
 if __name__ == "__main__":
-    
+    """
+    Main execution loop for processing disclosures and transactions.
+    Periodically checks for updates and processes new data.
+    """
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
     PDF_OUTPUT.mkdir(parents=True, exist_ok=True)
     JSON_OUTPUT.mkdir(parents=True, exist_ok=True)
         
-    if any(OUTPUT_FOLDER.glob("*.txt")):
-        CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
-
     while True:
         try:
             if download_file(DOWNLOAD_URL, OUTPUT_FOLDER):
-                CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
-                pelosi_transactions = parse_text_file(CURRENT_DISCLOSURE)
+                print(CURRENT_DISCLOSURE)
+                pelosi_transactions = parse_text_content(CURRENT_DISCLOSURE)
 
-                # scrape web for information regarding transaction ids 
+                # Scrape web for information regarding transaction IDs 
                 pdf_handler = PDFHandler(PDF_OUTPUT)
 
-                # iteraste through document ids and download transaction reports 
-                for k,v in pelosi_transactions.items():
-                    print("processing trade id: ", k)
+                # Iterate through document IDs and download transaction reports 
+                for k, v in pelosi_transactions.items():
+                    print("Processing trade ID: ", k)
                     pdf_handler.download_pdf(k) 
                 
                 transactions_data = pdf_handler.process_all_pdfs()
-                print('transactions_data', transactions_data)
                 
-                # save to json 
+                # Save to JSON 
                 last_modified_header = requests.head(DOWNLOAD_URL).headers.get("Last-Modified")
                 formatted_date = last_modified_header.replace(" ", "_").replace(":", "-")
                 json_filename = JSON_OUTPUT / f"{formatted_date}.json"
                 save_to_json(transactions_data, json_filename, last_modified_header)
+                
+                unique_tickers = {transaction['ticker'] for transaction in transactions_data}
+                for ticker in unique_tickers:
+                    print(ticker)
 
-
+                # Robinhood transactions
+                # robinhood_handler = RobinhoodHandler() 
 
         except Exception as e:
             print(f"Error processing disclosure file: {e}")
-
 
         print(f"Waiting for {CHECK_INTERVAL} seconds before checking again...")
         time.sleep(CHECK_INTERVAL)
