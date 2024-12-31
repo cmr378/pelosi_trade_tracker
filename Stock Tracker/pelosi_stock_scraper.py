@@ -4,7 +4,7 @@ import zipfile
 from datetime import datetime
 import time
 import json
-from Utilities.PDFHandler import PDFHandler
+from utilities.pdf_handler import PDFHandler
 
 from config.config import (
     DOWNLOAD_URL,
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
     PDF_OUTPUT.mkdir(parents=True, exist_ok=True)
-    JSON_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    JSON_OUTPUT.mkdir(parents=True, exist_ok=True)
         
     if any(OUTPUT_FOLDER.glob("*.txt")):
         CURRENT_DISCLOSURE = Path(get_most_recent_file_by_name(OUTPUT_FOLDER))
@@ -163,7 +163,11 @@ if __name__ == "__main__":
                 
                 # save to json 
                 last_modified_header = requests.head(DOWNLOAD_URL).headers.get("Last-Modified")
-                save_to_json(transactions_data, JSON_OUTPUT, last_modified_header)
+                formatted_date = last_modified_header.replace(" ", "_").replace(":", "-")
+                json_filename = JSON_OUTPUT / f"{formatted_date}.json"
+                save_to_json(transactions_data, json_filename, last_modified_header)
+
+
 
         except Exception as e:
             print(f"Error processing disclosure file: {e}")
