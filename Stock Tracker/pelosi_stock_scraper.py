@@ -178,14 +178,18 @@ if __name__ == "__main__":
                 save_to_json(transactions_data, json_filename, last_modified_header)
                 
                 unique_tickers = {transaction['ticker'] for transaction in transactions_data}
-                for ticker in unique_tickers:
-                    print(ticker)
 
-                # Robinhood transactions
-                # robinhood_handler = RobinhoodHandler() 
+                # Handles all logic related to Robinhood data/transactions 
+                robinhood_handler = RobinhoodHandler() 
+                
+                # Get latest prices of stocks in transaction 
+
+                for ticker in unique_tickers: 
+                    print(ticker,robinhood_handler.search_stock_price(ticker))
 
         except Exception as e:
             print(f"Error processing disclosure file: {e}")
 
         print(f"Waiting for {CHECK_INTERVAL} seconds before checking again...")
         time.sleep(CHECK_INTERVAL)
+5
