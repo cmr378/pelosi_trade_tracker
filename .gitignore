@@ -9,3 +9,7 @@ public_disclosures/*
 Stock Tracker/__pycache__/PDFHandler.cpython-311.pyc
 
 *.pyc
+
+.gitignore
+
+config/config.py

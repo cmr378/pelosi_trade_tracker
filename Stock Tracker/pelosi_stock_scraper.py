@@ -1,4 +1,5 @@
 from io import BytesIO
+import os
 import requests
 from pathlib import Path
 import zipfile
@@ -128,23 +129,59 @@ def save_to_json(data: dict, file_path: Path, last_modified: str) -> None:
     except Exception as e:
         print(f"Error saving data to JSON: {e}")
 
-def load_from_json(file_path: Path) -> dict:
+def load_from_json(folder_path: Path) -> list[dict]:
     """
-    Load a dictionary from a JSON file.
-    Returns an empty dictionary if the file does not exist or an error occurs.
+    Load a list of dictionaries from the most recently added JSON file in a folder.
+    Returns an empty list if the folder does not contain any JSON files or an error occurs.
+    Excludes the 'last_modified' field from the output.
     """
     try:
-        if not file_path.exists():
-            print(f"JSON file does not exist: {file_path}")
-            return {}
+        if not folder_path.is_dir():
+            print(f"The specified path is not a folder: {folder_path}")
+            return []
 
-        with open(file_path, "r", encoding="utf-8") as json_file:
+        # Get all JSON files in the folder
+        files = list(folder_path.glob("*.json"))
+
+        if not files:
+            print(f"No JSON files found in the folder: {folder_path}")
+            return []
+
+        # Find the most recently added file based on modification time
+        most_recent_file = max(files, key=lambda f: f.stat().st_mtime)
+
+        # Load the JSON data from the most recent file
+        with open(most_recent_file, "r", encoding="utf-8") as json_file:
             data = json.load(json_file)
-            print(f"Data successfully loaded from {file_path}")
-            return data
+            print(f"Data successfully loaded from {most_recent_file}")
+
+            # Return only the 'data' field
+            return data.get("data", [])
+
     except Exception as e:
         print(f"Error loading data from JSON: {e}")
-        return {}
+        return []
+    
+def compare_lists(list1, list2):
+    """
+    Compare two lists of dictionaries and return the differences.
+    - Identifies items only in list1.
+    - Identifies items only in list2.
+
+    Returns a dictionary with keys:
+    - 'only_in_list1'
+    - 'only_in_list2'
+    """
+    # Convert dictionaries to sorted tuples for comparison (to handle unhashable types)
+    set1 = {tuple(sorted(d.items())) for d in list1}
+    set2 = {tuple(sorted(d.items())) for d in list2}
+
+    # Find unique items in both lists
+    differences = set1.symmetric_difference(set2)
+
+    # Convert the tuples back to dictionaries
+    return [dict(t) for t in differences]
+
 
 if __name__ == "__main__":
     """
@@ -158,9 +195,14 @@ if __name__ == "__main__":
     while True:
         try:
             if download_file(DOWNLOAD_URL, OUTPUT_FOLDER):
-                print(CURRENT_DISCLOSURE)
-                pelosi_transactions = parse_text_content(CURRENT_DISCLOSURE)
 
+                # check for existing json file 
+                if os.path.exists(JSON_OUTPUT) and os.path.isdir(JSON_OUTPUT):
+                    if os.listdir(JSON_OUTPUT):
+                         previous_transaction_data = load_from_json(JSON_OUTPUT)
+                         print("Previous data loaded")
+
+                pelosi_transactions = parse_text_content(CURRENT_DISCLOSURE)
                 # Scrape web for information regarding transaction IDs 
                 pdf_handler = PDFHandler(PDF_OUTPUT)
 
@@ -179,13 +221,15 @@ if __name__ == "__main__":
                 
                 unique_tickers = {transaction['ticker'] for transaction in transactions_data}
 
-                # Handles all logic related to Robinhood data/transactions 
-                robinhood_handler = RobinhoodHandler() 
-                
-                # Get latest prices of stocks in transaction 
-
-                for ticker in unique_tickers: 
-                    print(ticker,robinhood_handler.search_stock_price(ticker))
+                # Check for any new transactions 
+                new_transactions = compare_lists(previous_transaction_data,  transactions_data)
+                if len(new_transactions) > 0: 
+                    print("New transactions", new_transactions)
+                    # Handles all logic related to Robinhood data/transactions 
+                    robinhood_handler = RobinhoodHandler() 
+                    robinhood_handler.purchase_stock_shares()
+                else:
+                    print("No new transaction from Nancy Pelosi")
 
         except Exception as e:
             print(f"Error processing disclosure file: {e}")
