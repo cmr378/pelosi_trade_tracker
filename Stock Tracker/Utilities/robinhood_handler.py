@@ -37,25 +37,19 @@ class RobinhoodHandler:
 
         # store all profile holdings 
         self.stocks = robinhood.build_holdings()
-        for key,value in self.stocks.items():
-            print(key,value,end='\n')
 
         # store only tickers 
         positions = robinhood.get_open_stock_positions()
         self.tickers = [robinhood.get_symbol_by_url(item["instrument"]) for item in positions] 
 
     
-    def search_stock_prices(self, tickers):
-
-        if isinstance(tickers, str):
-            tickers = [tickers]  # Convert single ticker to a list
-
-        last_prices = robinhood.get_quotes(tickers, "last_trade_price")
-        return [(ticker, price) for ticker, price in zip(tickers, last_prices)]
-
+    def search_stock_price(self, ticker):
+        price = robinhood.get_latest_price(ticker,'ask_price')
+        return price
 
     def purchase_stock_shares(self, share_amount, ticker):
         robinhood.order_buy_market(ticker,share_amount)
+        
         
 
 
